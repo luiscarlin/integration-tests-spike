@@ -22,7 +22,11 @@ const startServer = async () => {
   const port = 5000;
 
   server = await new Promise((resolve, reject) => {
-    const server = app.listen(port, () => {
+    const server = app.listen(port, (error) => {
+      if (error) {
+        console.log(`There was a problem starting the server: ${error}`);
+        reject(error);
+      }
       console.log(`Server is running on port ${port}`);
       resolve(server);
     });
@@ -31,7 +35,11 @@ const startServer = async () => {
 
 const stopServer = async () => {
   return new Promise((resolve, reject) => {
-    server.close(() => {
+    server.close((error) => {
+      if (error) {
+        console.log(`There was a problem stopping the server: ${error}`);
+        reject(error);
+      }
       console.log("Server has stopped.");
       resolve();
     });
