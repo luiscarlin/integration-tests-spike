@@ -1,6 +1,7 @@
-// Import required modules
 const express = require("express");
 const bodyParser = require("body-parser");
+
+const port = 5000;
 
 // Create an instance of Express
 const app = express();
@@ -19,45 +20,48 @@ app.get("/hello", (req, res) => {
 });
 
 const startServer = async () => {
-  const port = 5000;
-
-  server = await new Promise((resolve, reject) => {
-    const server = app.listen(port, (error) => {
-      if (error) {
-        console.log(`There was a problem starting the server: ${error}`);
+  return new Promise((resolve, reject) => {
+    server = app
+      .listen(port)
+      .once("listening", () => {
+        console.log(`Server is running on port ${port}`);
+        resolve(server);
+      })
+      .once("error", (error) => {
         reject(error);
-      }
-      console.log(`Server is running on port ${port}`);
-      resolve(server);
-    });
+      });
+  });
+};
+
+// Handle server termination
+const handleServerTermination = () => {
+  stopServer().then(() => {
+    process.exit();
   });
 };
 
 const stopServer = async () => {
   return new Promise((resolve, reject) => {
+    server.on("close", () => {
+      console.log("Server has stopped.");
+      resolve();
+    });
     server.close((error) => {
       if (error) {
         console.log(`There was a problem stopping the server: ${error}`);
         reject(error);
       }
-      console.log("Server has stopped.");
-      resolve();
     });
   });
 };
 
+// Start the server if running as the main module
 if (require.main === module) {
   startServer();
 
-  process.on("SIGINT", async () => {
-    await stopServer();
-    process.exit();
-  });
-
-  process.on("SIGTERM", async () => {
-    await stopServer();
-    process.exit();
-  });
+  // Handle SIGINT and SIGTERM signals for graceful termination
+  process.on("SIGINT", handleServerTermination);
+  process.on("SIGTERM", handleServerTermination);
 }
 
 module.exports = { startServer, stopServer };
