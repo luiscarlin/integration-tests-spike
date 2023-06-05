@@ -1,6 +1,6 @@
 const { startServer, stopServer } = require("./server");
 
-describe("hello", () => {
+describe("greet", () => {
   beforeAll(async () => {
     await startServer();
   });
@@ -9,7 +9,7 @@ describe("hello", () => {
     await stopServer();
   });
 
-  it('should return "Hello, World!"', async () => {
+  it('returns "Greetings, Luis" when sending "Luis" as name', async () => {
     expect("Hello, World!").toBe("Hello, World!");
   });
 });
